@@ -1,0 +1,220 @@
+//Autor: @JoaoCastelo
+//Problema: BES
+//Laboratório de Programação
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <malloc.h>
+#include <limits.h>
+#include <assert.h>
+
+//Tamanho dos arrays
+
+#define A_SIZE 120
+#define ACCOUNT_NAME 40
+
+char *str_dup (const char *s)
+{
+	char *result = (char*) malloc(strlen(s) + 1);
+	strcpy(result, s);
+	return result;
+}
+
+//Estrutura e construtores dos investimentos
+
+typedef struct
+{
+	const char *account;
+	int money;
+} Investment;
+
+Investment char_int (const char *account, int money)
+{
+	Investment result;
+	result.account = account;
+	result.money = money;
+	return result;
+}
+
+//Leitura do ficheiro aldrabado
+
+int cheated_read (FILE *f, Investment *a)
+{
+	int result = 0;
+	char account[ACCOUNT_NAME];
+	int money;
+	while (fscanf(f, "%s%d", account, &money) != EOF)
+		a[result++] = char_int(str_dup(account), money);
+	return result;
+}
+
+//Leitura do ficheiro válido
+
+int valid_read (Investment *b)
+{
+	int result = 0;
+	char account[ACCOUNT_NAME];
+	int money;
+	while(scanf("%s%d", account, &money) != EOF)
+		b[result++] = char_int(str_dup(account), money);
+	return result;
+}
+
+//Escrita do resultado final
+
+void final_result_writer (Investment *c, int n)		//ATENÇAO. VALORES ALTERADOS PARA INT PARA EFEITOS DE TESTE
+{
+	for (int i = 0; i < n; ++i)
+	{
+		printf("%s %d\n", c[i].account, c[i].money);
+	}
+}
+
+//Algoritmo de comparação
+
+int Investement_account_cmp(Investment a, Investment b)
+{
+	return strcmp(a.account, b.account);
+}
+
+//Algoritmo de comparação e desempate
+
+int final_comp (Investment *a, int n)
+{
+	int result = 0;
+	for (int i = 0; i < n; ++i)
+	{
+		result = a[i].money - a[i+1].money;
+		if (result == 0)
+		{
+			result = Investement_account_cmp(a[i], a[i+1]);
+		}
+	}
+	return result;
+}
+
+//Algoritmo de ordenação - mergesort
+
+int Investement_copy (Investment *a, int n, Investment *b)
+{
+	if (n < 0)
+		n = 0;
+	memmove(b, a, n * sizeof(Investment));
+	return n;
+}
+
+int Investement_merge (Investment *a, int n, Investment *b, int m, Investment *c, int(*cmp)(Investment,Investment))
+{
+	int result = 0;
+	int i = 0;
+	int j = 0;
+	while (i < n && j < m)
+	{
+		if (cmp(a[i], b[j]) <= 0)
+			c[result++] = a[i++];
+		else
+			c[result++] = b[j++];
+	}		
+	result += Investement_copy(a + i, n - i, c+result);
+	result += Investement_copy(b + j, m - j, c+result);
+	return result;
+}
+
+void Investement_msort (Investment *a, int n, int(*cmp)(Investment, Investment))
+{
+	if (n > 1)
+	{
+		int m = n/2;
+		Investement_msort(a, m, cmp);
+		Investement_msort(a+m, n-m, cmp);
+		Investment b[n];
+		Investement_merge(a, m, a+m, n-m, b, cmp);
+		Investement_copy(b, n, a);
+	}
+}
+
+//Algoritmo de ordenação final
+
+int Investement_final_merge (Investment *a, int n, Investment *b, int m, Investment *c)
+{
+	int result = 0;
+	int i = 0;
+	int j = 0;
+	while (i < n && j < m)
+	{
+		if (a[i].money >= b[j].money)
+		{
+			c[result++] = a[i++];
+		}
+		else if (a[i].money < b[j].money)
+		{
+			c[result++] = b[j++];
+		}
+		else
+			return 0;
+			
+	}
+	result += Investement_copy(a + i, n - i, c+result);
+	result += Investement_copy(b + j, m - j, c+result);
+	return result;
+}
+
+void Investement_final_msort (Investment *a, int n)
+{
+	if (n > 1)
+	{
+		int m = n/2;
+		Investement_final_msort(a, m);
+		Investement_final_msort(a+m, n-m);
+		Investment b[n];
+		Investement_final_merge(a, m, a+m, n-m, b);
+		Investement_copy(b, n, a);
+	}
+}
+
+//Cálculo da aldrabice de um investimento
+
+int cheated_invest (Investment *a, int j, Investment *b, int o, Investment *c, int(*cmp)(Investment, Investment))
+{
+	int result = 0;
+	int s = 0;
+	int t = 0;
+	while (s < j && t < o)
+		if (cmp(a[s], b[t]) == 0)
+		{
+			c[result++] = char_int(str_dup(a[s].account), a[s].money - b[t].money);
+			s++;
+			t++;
+		}
+		else if (cmp(a[s], b[t]) > 0)
+		{
+			t++;
+		}
+		else
+			s++;
+	return result;
+}
+
+void test(const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+	assert(f != NULL);
+	Investment a[A_SIZE];																//Ficheiro aldrabado
+	Investment b[A_SIZE];																//Ficheiro válido
+	Investment c[A_SIZE];																//resultado final
+	int t_a = cheated_read(f, a);
+	int t_b = valid_read(b);
+	Investement_msort(a, t_a, Investement_account_cmp);									//Ordenação array a
+	Investement_msort(b, t_b, Investement_account_cmp);									//Ordenação array b
+	int t_c = cheated_invest(a, t_a, b, t_b, c, Investement_account_cmp);				//comparação e cálculo 
+	Investement_final_msort(c, t_c);													//ordenção decrescente e desempate
+	final_result_writer(c, t_c);														//Esrita do array c
+}
+
+int main(int argc, char const *argv[])
+{
+	test(argv[1]);
+	return 0;
+}
