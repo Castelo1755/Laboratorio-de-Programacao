@@ -1,0 +1,241 @@
+//Autor: @JoaoCastelo
+//Problema: qsort
+//Laboratório de Programação
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <malloc.h>
+#include <limits.h>
+#include <assert.h>
+
+//Tamanho dos arrays
+
+#define A_SIZE 120		//tamanho do array
+#define S_SIZE 40		//tamanho dos strings
+
+char *str_dup (const char *s)
+{
+	char *result = (char*) malloc(strlen(s) + 1);
+	strcpy(result, s);
+	return result;
+}
+
+double round(double x)
+{
+	return floor(x+0.5);
+}
+
+//Estrutura e construtor de inteiros - Quicksort
+
+typedef struct
+{
+	char *string;
+	int number;
+} Int_Struct;
+
+Int_Struct char_int (char *string, int number)
+{
+	Int_Struct result;
+	result.string = string;
+	result.number = number;
+	return result;
+}
+
+//Comparação
+
+int Int_Struct_string_cmp_o (Int_Struct *a, Int_Struct *b)
+{
+	return strcmp(a->string, b->string);
+}
+
+int Int_Srtuct_string_cmp (Int_Struct *a, Int_Struct *b)
+{
+	int result = strcmp(a->string, b->string);
+	if (result == 0)
+		result = a->number - b->number;
+	return result;
+}
+
+int Int_Struct_string_cmp_v (const void *a, const void *b)
+{
+	return Int_Srtuct_string_cmp((Int_Struct *) a, (Int_Struct *) b);
+}
+
+int Int_Srtuct_number_cmp (const Int_Struct *a, const Int_Struct *b)
+{
+	int result = b->number - a->number;
+	if (result == 0)
+		result = strcmp(a->string, b->string);
+	return result;
+}
+
+int Int_Struct_number_cmp_v (const void *a, const void *b)
+{
+	return Int_Srtuct_number_cmp((Int_Struct *) a, (Int_Struct *) b);
+}
+
+//Algoritmo de ordenação - qsort
+
+void qsort (void *a, size_t n, size_t size, int (*cmp) (const void*, const void*));
+
+//BES
+
+int cheated_invest (Int_Struct *a, int j, Int_Struct *b, int o, Int_Struct *c, int(*cmp)(Int_Struct *, Int_Struct *))
+{
+	int result = 0;
+	int s = 0;
+	int t = 0;
+	while (s < j && t < o)
+		if (cmp(&a[s], &b[t]) == 0)
+		{
+			c[result++] = char_int(str_dup(a[s].string), a[s].number - b[t].number);
+			s++;
+			t++;
+		}
+		else if (cmp(&a[s], &b[t]) > 0)
+		{
+			t++;
+		}
+		else
+			s++;
+	return result;
+}
+
+//Síria
+
+//Busca dicotomica
+
+int rank (Int_Struct *a, int n, const char *b)
+{
+	int result = 0;
+	while (n > 0)
+	{
+		int m = n/2;
+		if (strcmp(b, a[m].string) <= 0)
+		{
+			n = m;
+		}
+		else
+		{
+			result += m+1;
+			a += m+1;
+			n -= m+1;
+		}
+	}
+	return result;
+}
+
+int Int_Struct_bfind (Int_Struct *a, int n, const char *b)
+{
+	int r = rank(a, n, b);
+	return r < n && strcmp(a[r].string, b) == 0 ? r : -1;
+}
+
+//Calculo
+
+double relati_parti(Int_Struct *a, int n, Int_Struct *b, int m, Int_Struct *c)
+{
+	int result = 0;
+	for (int i = 0; i < m; ++i)
+	{
+		int z = Int_Struct_bfind(a, n, b[i].string);
+		if (Int_Struct_bfind >= 0)
+		{
+			c[result++] = char_int(str_dup(b[i].string), round(((double)(b[i].number)/(a[z].number))*1000000));
+		}
+	}
+	return result;
+}
+
+//Funçoes de leitura e escrita
+
+int info_read (FILE *f, Int_Struct *a)		//leitura de ficheiro
+{
+	int result = 0;
+	char string[S_SIZE];
+	int number;
+	while (fscanf(f, "%s%d", string, &number) != EOF)
+		a[result++] = char_int(str_dup(string), number);
+	return result;
+}
+
+int cmd_read (Int_Struct *b)			//leitura da consola
+{
+	int result = 0;
+	char string[S_SIZE];
+	int number;
+	while(scanf("%s%d", string, &number) != EOF)
+		b[result++] = char_int(str_dup(string), number);
+	return result;
+}
+
+//Escrita do resultado final
+
+void int_writer (Int_Struct *c, int n)	//escrita na consola
+{
+	for (int i = 0; i < n; ++i)
+	{
+		printf("%s %d\n", c[i].string, c[i].number);
+	}
+}
+
+void double_writer (Int_Struct *c, int n)
+{
+	for (int i = 0; i < n; ++i)
+	{
+		printf("%s %f\n", c[i].string, (double)(c[i].number)/1000000);
+	}
+}
+
+//Funções de teste
+
+void test_bes(const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+	assert(f != NULL);
+	Int_Struct a[A_SIZE];														//Ficheiro aldrabado
+	Int_Struct b[A_SIZE];														//Ficheiro válido
+	Int_Struct c[A_SIZE];														//resultado final
+	int t_a = info_read(f, a);
+	int t_b = info_read(stdin, b);
+	qsort(a, t_a, sizeof(Int_Struct), Int_Struct_string_cmp_v);					//Ordenação array a
+	qsort(b, t_b, sizeof(Int_Struct), Int_Struct_string_cmp_v);					//Ordenação array b
+	int t_c = cheated_invest(a, t_a, b, t_b, c, Int_Struct_string_cmp_o);		//comparação e cálculo 
+	qsort(c, t_c, sizeof(Int_Struct), Int_Struct_number_cmp_v);					//ordenção decrescente e desempate
+	//int_writer(a, t_a);														//Teste esrita do array a
+	//int_writer(b, t_b);														//Teste esrita do array b
+	int_writer(c, t_c);															//Esrita do array c
+}
+
+void test_siria(const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+	assert(f != NULL);
+	Int_Struct a[A_SIZE];														                    //população
+	Int_Struct b[A_SIZE];														                    //combatentes
+	Int_Struct c[A_SIZE];														                    //resultado final
+	int t_a = info_read(f, a);													                //Determinação do tamanho do array através da sua leituta
+	int t_b = info_read(stdin, b);
+	qsort(a, t_a, sizeof(Int_Struct), Int_Struct_string_cmp_v);					//mergesort de países com o array da população
+	relati_parti(a, t_a, b, t_b, c); 											              //comparação e cálculo 
+	qsort(c, t_b, sizeof(Int_Struct), Int_Struct_number_cmp_v);
+	//int_writer(a, t_a);
+	//int_writer(b, t_b);														                    //se puser t_p da um smile triste :-( //Teste ecrita combatentes
+	double_writer(c, t_b);
+}
+
+int main(int argc, char const **argv)
+{
+	char x = 'A';
+    if (argc > 1)
+        x = *argv[1];
+    if (x == 'S')
+        test_siria(argv[2]);
+    else if (x == 'B')
+        test_bes(argv[2]);
+    else
+        printf("%c Invalid option.\n", x);
+	return 0;
+}
