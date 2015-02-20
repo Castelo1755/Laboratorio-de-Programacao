@@ -1,0 +1,203 @@
+//Autor: @JoaoCastelo
+//Problema: Síria
+//Laboratório de Programação
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <malloc.h>
+#include <limits.h>
+#include <assert.h>
+
+//Tamanho dos arrays
+
+#define A_SIZE 120
+#define COUNTRY_NAME 40
+
+char *str_dup (const char *s)
+{
+	char *result = (char*) malloc(strlen(s) + 1);
+	strcpy(result, s);
+	return result;
+}
+
+double round(double x)
+{
+	return floor(x+0.5);
+}
+
+//Estrutura e construtores de inteiros
+
+typedef struct
+{
+	char *country;
+	int number;
+} Int_Struct;
+
+Int_Struct char_int (char *country, int number)
+{
+	Int_Struct result;
+	result.country = country;
+	result.number = number;
+	return result;
+}
+
+typedef int (*Int_Struct_cmp)(Int_Struct, Int_Struct);
+
+//Leitura do ficheiro da população
+
+int population_read (FILE *f, Int_Struct *a)
+{
+	int result = 0;
+	char country[COUNTRY_NAME];
+	int number;
+	while (fscanf(f, "%s%d", country, &number) != EOF)
+		a[result++] = char_int(str_dup(country), number);
+	return result;
+}
+
+//Leitura do ficheiro dos combatentes
+
+int fighters_read (Int_Struct *b)
+{
+	int result = 0;
+	char country[COUNTRY_NAME];
+	int number;
+	while(scanf("%s%d", country, &number) != EOF)
+		b[result++] = char_int(str_dup(country), number);
+	return result;
+}
+
+//Escrita do resultado final
+
+void final_result_writer (Int_Struct *c, int n)		//ATENÇAO. VALORES ALTERADOS PARA INT PARA EFEITOS DE TESTE
+{
+	for (int i = 0; i < n; ++i)
+	{
+		printf("%s %f\n", c[i].country, (double)(c[i].number)/1000000);
+	}
+}
+
+//Comparação
+
+int Ints_Srtuct_country_cmp(Int_Struct a, Int_Struct b)
+{
+	return strcmp(a.country, b.country);
+}
+
+int Ints_Srtuct_number_cmp(Int_Struct a, Int_Struct b)	//Usada no resultado final
+{
+	int result = b.number - a.number;
+	if (result == 0)
+		result = strcmp(a.country, b.country);
+	return result;
+}
+
+//Algoritmo de ordenação - mergesort
+
+int Ints_struct_copy (const Int_Struct *a, int n, Int_Struct *b)
+{
+	if (n < 0)
+		n = 0;
+	memmove(b, a, n * sizeof(Int_Struct));
+	return n;
+}
+
+int Ints_struct_merge (const Int_Struct *a, int n, const Int_Struct *b, int m, Int_Struct *c, int(*cmp)(Int_Struct,Int_Struct))
+{
+	int result = 0;
+	int i = 0;
+	int j = 0;
+	while (i < n && j < m)
+	{
+		if (cmp(a[i], b[j]) <= 0)
+			c[result++] = a[i++];
+		else
+			c[result++] = b[j++];
+	}		
+	result += Ints_struct_copy(a + i, n - i, c+result);
+	result += Ints_struct_copy(b + j, m - j, c+result);
+	return result;
+}
+
+void Ints_struct_msort (Int_Struct *a, int n, int(*cmp)(Int_Struct, Int_Struct))
+{
+	if (n > 1)
+	{
+		int m = n/2;
+		Ints_struct_msort(a, m, cmp);
+		Ints_struct_msort(a+m, n-m, cmp);
+		Int_Struct *b = malloc(n * sizeof(Int_Struct));
+		Ints_struct_merge(a, m, a+m, n-m, b, cmp);
+		Ints_struct_copy(b, n, a);
+	}
+}
+
+//Busca dicotomica
+
+int rank (Int_Struct *a, int n, const char *b)
+{
+	int result = 0;
+	while (n > 0)
+	{
+		int m = n/2;
+		if (strcmp(b, a[m].country) <= 0)
+		{
+			n = m;
+		}
+		else
+		{
+			result += m+1;
+			a += m+1;
+			n -= m+1;
+		}
+	}
+	return result;
+}
+
+int Int_Struct_bfind (Int_Struct *a, int n, const char *b)
+{
+	int r = rank(a, n, b);
+	return r < n && strcmp(a[r].country, b) == 0 ? r : -1;
+}
+
+//Calculo
+
+double relati_parti(Int_Struct *a, int n, Int_Struct *b, int m, Int_Struct *c)
+{
+	int result = 0;
+	for (int i = 0; i < m; ++i)
+	{
+		int z = Int_Struct_bfind(a, n, b[i].country);
+		if (Int_Struct_bfind >= 0)
+		{
+			c[result++] = char_int(str_dup(b[i].country), round(((double)(b[i].number)/(a[z].number))*1000000));
+		}
+	}
+	return result;
+}
+
+
+void test(const char *filename)
+{
+	FILE *f = fopen(filename, "r");
+	assert(f != NULL);
+	Int_Struct a[A_SIZE];										                //população
+	Int_Struct b[A_SIZE];										                //combatentes
+	Int_Struct c[A_SIZE];										                //resultado final
+	int t_p = population_read(f, a);							          //Determinação do tamanho do array através da sua leituta
+	Ints_struct_msort(a, t_p, Ints_Srtuct_country_cmp);			//mergesort de países com o array da população
+	int t_c = fighters_read(b);
+	relati_parti(a, t_p, b, t_c, c); 							          //comparação e cálculo 
+	Ints_struct_msort(c, t_c, Ints_Srtuct_number_cmp);
+	//final_result_writer(a, t_p);
+	//final_result_writer(b, t_c);								          //se puser t_p da um smile triste :-( //Teste ecrita combatentes
+	final_result_writer(c, t_c);
+}
+
+int main(int argc, char *argv[])
+{
+	test(argv[1]);
+	return 0;
+}
