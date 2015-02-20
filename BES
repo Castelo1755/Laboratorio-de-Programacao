@@ -201,16 +201,16 @@ void test(const char *filename)
 {
 	FILE *f = fopen(filename, "r");
 	assert(f != NULL);
-	Investment a[A_SIZE];																//Ficheiro aldrabado
-	Investment b[A_SIZE];																//Ficheiro válido
-	Investment c[A_SIZE];																//resultado final
+	Investment a[A_SIZE];									//Ficheiro aldrabado
+	Investment b[A_SIZE];									//Ficheiro válido
+	Investment c[A_SIZE];									//resultado final
 	int t_a = cheated_read(f, a);
 	int t_b = valid_read(b);
-	Investement_msort(a, t_a, Investement_account_cmp);									//Ordenação array a
-	Investement_msort(b, t_b, Investement_account_cmp);									//Ordenação array b
-	int t_c = cheated_invest(a, t_a, b, t_b, c, Investement_account_cmp);				//comparação e cálculo 
-	Investement_final_msort(c, t_c);													//ordenção decrescente e desempate
-	final_result_writer(c, t_c);														//Esrita do array c
+	Investement_msort(a, t_a, Investement_account_cmp);					//Ordenação array a
+	Investement_msort(b, t_b, Investement_account_cmp);					//Ordenação array b
+	int t_c = cheated_invest(a, t_a, b, t_b, c, Investement_account_cmp);			//comparação e cálculo 
+	Investement_final_msort(c, t_c);							//ordenção decrescente e desempate
+	final_result_writer(c, t_c);								//Esrita do array c
 }
 
 int main(int argc, char const *argv[])
