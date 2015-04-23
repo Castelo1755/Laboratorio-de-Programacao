@@ -1,0 +1,50 @@
+//Move the Switzerland flag by dragging it with the mouse
+
+int myWidth = 600;                      //Windows Width
+int myHeight = 480;                     //Windows Height
+int boxWidth = 250;                     //Width of the shape
+int boxHeight = 150;                    //Height of the box
+float cx, cy;                           //coordinates for the ellipse's centre
+
+color red = color(255,0,0);             //Red
+color white = color(255,255,255);       //White
+
+
+void setup()
+{
+  //Setup the size of the window
+  size(myWidth, myHeight);
+  
+  noStroke();
+  rectMode(CENTER);
+  
+  //Center of the rectangle
+  cx = width/2;                        //Set the ellipse to star at 
+  cy = height/2;                       //the center of the window
+}
+
+void mouseDragged()
+{
+  //Check if the mouse is inside of the ellipse
+  if(mouseX > cx-boxWidth/2 && mouseX < cx+boxWidth/2 && mouseY > cy-boxHeight/2 && mouseY < cy+boxHeight/2)  //Check if the mouse is inside of the shape
+  {
+     cx += (mouseX - pmouseX);                      //change the x coordinates
+     cy += (mouseY - pmouseY);                      //change the y coordinates
+  }
+}
+
+void draw()
+{
+  background(250);
+  
+  //Draw the red flag background
+  fill(red);
+  noStroke();
+  
+  //Draw the 2 white segments of the flag
+  rect(cx, cy, boxWidth, boxHeight);
+  fill(white);
+  noStroke();
+  rect(cx, cy, 100,30);
+  rect(cx, cy, 30, 100);
+}
