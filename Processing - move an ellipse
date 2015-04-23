@@ -1,0 +1,37 @@
+//Move an ellipse dragging it if the mouse is clicked inside
+
+int myWidth = 600;                      //Windows Width
+int myHeight = 480;                     //Windows Height
+int rad = 60;                           //Width of the shape
+float cx, cy;                           //coordinates for the ellipse's centre
+color green = color(153,252,105);       //Green
+
+void setup()
+{
+  //Setup the size of the window
+  size(myWidth, myHeight);
+  
+  //Center of the ellipse
+  cx = width/2;                        //Set the ellipse to star at 
+  cy = height/2;                       //the center of the window
+}
+
+void mouseDragged()
+{
+  //Check if the mouse is inside of the ellipse
+  if((sqrt((sq(cx - mouseX))+(sq(cy - mouseY)))) < rad/2)
+  {
+     cx = mouseX;    //change the x coordinates
+     cy = mouseY;    //change the y coordinates
+  }
+}
+
+void draw()
+{
+  background(102);
+  
+  //Draw the green ellipse with the x and y coordinates calculated on the function mouseDragged
+  fill(green);
+  noStroke();
+  ellipse(cx, cy, rad, rad);
+}
