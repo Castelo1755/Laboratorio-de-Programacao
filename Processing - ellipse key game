@@ -1,0 +1,73 @@
+//Move one ellipse pressing h for left, j for down, k for up and l for right
+//If the ellipse touch the window limit, it's pushed back
+
+int myWidth = 600;    //Windows Width
+int myHeight = 480;   //Windows Height
+
+int rad = 60;         //Width of the shape
+float xpos, ypos;     //Starting position of the shape
+float cx, cy, dx, dy;
+
+int xdirection = 1;   // Left or Right
+int ydirection = 1;   // Top to Bottom
+
+color green = color(153,252,105);
+
+void setup()
+{
+  //Setup the size of the window
+  size(myWidth, myHeight);
+  
+  frameRate(100);
+  
+  //Draw the shape without outline
+  noStroke();
+  
+  ellipseMode(RADIUS);
+  
+  dx = 0;
+  dy = 0;
+  
+  //Center of the ellipse
+  cx = width/2;
+  cy = height/2;
+
+}
+
+//If the selected keys are pressed, start moving the ellipse
+void keyPressed()
+{
+   if(key == 'l' || key == 'h' || key == 'j' || key == 'k' || key == ' '){
+    dx = int(key == 'l') - int(key == 'h');    //If you press one of these keys, the ellipse moves on the x axis
+    dy = int(key == 'j') - int(key == 'k');    //If you press one of these keys, the ellipse moves on the y axis
+  }
+
+}
+
+void draw()
+{  
+  // Test to see if the shape exceeds the boundaries of the screen
+  // If it does, reverse its direction by multiplying by -1  
+  if(cx > width-rad || cx < rad)
+  {
+    println("Invert direction x");
+    dx *= -1;
+  }
+  if(cy > height-rad || cy < rad)
+  {
+    println("Invert direction y");
+    dy *= -1;
+  }
+  
+  //Setup the background
+  background(102);
+  
+  //The ellipse will be drawn with a green fill and without outline
+  fill(green);
+  noStroke();
+  ellipse(cx ,cy, rad, rad);
+  
+  //Change the center of the ellipse according to the values from the keyPress function
+  cx += dx;
+  cy += dy;
+}
