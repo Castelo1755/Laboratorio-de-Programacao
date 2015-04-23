@@ -25,9 +25,6 @@ void setup()
   
   ellipseMode(RADIUS);
   
-  dx = 0;
-  dy = 0;
-  
   //Center of the ellipse
   cx = width/2;
   cy = height/2;
